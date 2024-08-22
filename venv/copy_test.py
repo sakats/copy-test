@@ -1,20 +1,22 @@
 import psycopg2
 
 def main():
-    """psycopg2 2.8.6でCOPYの動作を確認
+    """psycopg2 2.9.9でCOPYの動作を確認
     """
-    schema = ""
-    table_name = ""
-    import_file = "test.csv"
+    schema = "sub_schema"
+    table_name = "users"
     with get_connection() as conn:
         with conn.cursor() as cur:
-            cur.copy_from(file=import_file, table=f"{schema}.{table_name}", sep=",")
+            with open(r"input_file\user_list.csv", mode="r", encoding="utf-8") as f:
+                cur.execute(f'SET search_path TO {schema}')
+                cur.copy_from(f, table=f"{table_name}", sep=",", columns=('name', 'email'))
+                conn.commit()
 
 def get_connection():
     dsn = {
         "host":"localhost",
         "port":"5432",
-        "database":"test_db",
+        "database":"copy_test",
         "user":"postgres",
         "password":"postgres",
     }
